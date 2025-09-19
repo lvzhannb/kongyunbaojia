@@ -1,0 +1,892 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>报价计算结果</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  '导航主页': '导航主页',
+    '询报价首页': '空运询报价',
+    '计算结果页': '报价计算结果',
+    '报价单详情页': '报价单详情',
+    '历史询价页': '历史询价记录'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh-CN" data-theme="business"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报价计算结果 - 空运通</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+/* CSS code for common usage*/
+/* daisyUI Theme Variables Customization
+ * Based on the selected daisyUI theme and UI guidance requirements,
+ * customize only the CSS variables that need to be different from the theme defaults.
+ */
+:root {
+    /* Brand Colors Override for Air Freight Logistics Theme */
+    --color-primary: rgba(37, 99, 235, 1); /* Professional Blue */
+    --color-secondary: rgba(51, 65, 85, 1); /* Slate Gray */
+    --color-accent: rgba(34, 197, 94, 1); /* Success Green */
+    --color-base-100: rgba(255, 255, 255, 1); /* Pure White */
+    --color-base-200: rgba(248, 250, 252, 1); /* Light Gray */
+    --color-base-300: rgba(226, 232, 240, 1); /* Border Gray */
+    --color-error: rgba(239, 68, 68, 1); /* Error Red */
+    --color-warning: rgba(245, 158, 11, 1); /* Warning Amber */
+    --color-info: rgba(59, 130, 246, 1); /* Info Blue */
+    --radius-box: 0.5rem; /* 8px professional rounding */
+    --border: 1px;
+}
+
+/* Global Layout Styles */
+.app-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* Header Styles */
+.app-header {
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--color-base-100);
+    border-bottom: var(--border) solid var(--color-base-300);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar Styles */
+.app-sidebar {
+    width: 280px;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    transition: width 0.3s ease-in-out;
+    background: var(--color-base-100);
+    border-right: var(--border) solid var(--color-base-300);
+}
+
+.app-sidebar.collapsed {
+    width: 80px;
+}
+
+.app-sidebar.collapsed .sidebar-text {
+    display: none;
+}
+
+.app-sidebar.collapsed .sidebar-item {
+    justify-content: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Active Navigation State */
+.nav-item-active {
+    background: rgba(37, 99, 235, 0.1);
+    border-left: 4px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Smooth transitions for navigation */
+.nav-item {
+    transition: all 0.15s ease-in-out;
+}
+
+.nav-item:hover {
+    background: rgba(37, 99, 235, 0.05);
+}
+
+/* Footer Styles */
+.footer-comprehensive {
+    background: var(--color-secondary);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.footer-simple {
+    height: 32px;
+    background: var(--color-base-200);
+    border-top: var(--border) solid var(--color-base-300);
+}
+
+/* Custom logistics-specific styles */
+.logistics-brand {
+    background: linear-gradient(135deg, var(--color-primary), rgba(59, 130, 246, 1));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: 700;
+}
+</style>
+    <style>
+/* 总费用突出显示动画 */
+@keyframes highlightPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.total-cost-highlight {
+    animation: highlightPulse 0.8s ease-in-out;
+}
+
+.total-amount {
+    animation: highlightPulse 0.8s ease-in-out 0.3s;
+}
+
+/* 按钮悬停效果 */
+.confirm-quote-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.confirm-quote-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+}
+
+/* 表格行悬停效果 */
+.table tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.05);
+}
+
+/* 卡片微纹理背景 */
+.card {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.95) 100%);
+    backdrop-filter: blur(10px);
+}
+
+/* 费用类型颜色标识 */
+tr[data-type="shipping"] td:first-child::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--color-primary);
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+tr[data-type="fuel"] td:first-child::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--color-warning);
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+tr[data-type="tax"] td:first-child::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--color-info);
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+tr[data-type="service"] td:first-child::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--color-success);
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+/* 表格头部样式增强 */
+.table thead th {
+    background: linear-gradient(135deg, 
+        rgba(248, 250, 252, 1) 0%, 
+        rgba(241, 245, 249, 1) 100%);
+    border-bottom: 2px solid var(--color-base-300);
+    font-weight: 600;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* 微妙的阴影效果 */
+.card {
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* 按钮组间距优化 */
+.btn + .btn {
+    margin-left: 0;
+}
+
+/* 表格排序指示器 */
+.table th.sorted-asc .iconify {
+    transform: rotate(180deg);
+    color: var(--color-primary);
+}
+
+.table th.sorted-desc .iconify {
+    color: var(--color-primary);
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="min-h-screen bg-base-100 flex flex-col">
+    <div data-section-id="common_header" data-section-type="common_header">
+    <header class="app-header">
+        <div class="navbar px-6">
+            <!-- Navbar Start - Logo and Mobile Menu -->
+            <div class="navbar-start">
+                <div class="dropdown lg:hidden">
+                    <button class="btn btn-ghost" onclick="toggleMobileMenu()">
+                        <span class="iconify" data-icon="heroicons:bars-3" data-width="24"></span>
+                    </button>
+                    <ul class="mobile-menu menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52 hidden">
+                        <li><a onclick="navigateTo(&#39;导航主页&#39;)">首页</a></li>
+                        <li><a onclick="navigateTo(&#39;客服问答页&#39;)">客服问答</a></li>
+                        <li><a onclick="navigateTo(&#39;询报价首页&#39;)">空运报价</a></li>
+                        <li><a onclick="navigateTo(&#39;历史询价页&#39;)">历史记录</a></li>
+                        <li><a onclick="navigateTo(&#39;人工客服联系页&#39;)">联系客服</a></li>
+                        <li><a onclick="navigateTo(&#39;个人设置页&#39;)">个人设置</a></li>
+                    </ul>
+                </div>
+                <a class="btn btn-ghost text-xl font-bold text-primary" onclick="navigateTo(&#39;导航主页&#39;)">
+                    <span class="iconify text-primary" data-icon="heroicons:paper-airplane" data-width="32"></span>
+                    <span class="logistics-brand">空运通</span>
+                </a>
+            </div>
+
+            <!-- Navbar Center - Main Navigation -->
+            <div class="navbar-center hidden lg:flex">
+                <ul class="menu menu-horizontal px-1">
+                    <li><a class="nav-item" data-nav-page="导航主页" onclick="navigateTo(&#39;导航主页&#39;)">首页</a></li>
+                    <li>
+                        <details>
+                            <summary class="nav-item">服务</summary>
+                            <ul class="p-2 z-10 bg-base-100 rounded-box shadow-lg">
+                                <li><a onclick="navigateTo(&#39;客服问答页&#39;)">客服问答</a></li>
+                                <li><a onclick="navigateTo(&#39;询报价首页&#39;)">空运报价</a></li>
+                                <li><a onclick="navigateTo(&#39;人工客服联系页&#39;)">联系客服</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <details>
+                            <summary class="nav-item">报价管理</summary>
+                            <ul class="p-2 z-10 bg-base-100 rounded-box shadow-lg">
+                                <li><a onclick="navigateTo(&#39;询报价首页&#39;)">新建报价</a></li>
+                                <li><a onclick="navigateTo(&#39;历史询价页&#39;)">历史记录</a></li>
+                                <li><a onclick="navigateTo(&#39;计算结果页&#39;)">报价结果</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li><a class="nav-item" data-nav-page="客服问答页" onclick="navigateTo(&#39;客服问答页&#39;)">智能客服</a></li>
+                </ul>
+            </div>
+
+            <!-- Navbar End - Search and User Menu -->
+            <div class="navbar-end flex items-center gap-4">
+                <!-- Global Search -->
+                <div class="form-control hidden md:block">
+                    <div class="join">
+                        <input type="text" placeholder="搜索运单号、报价..." class="input input-bordered input-sm join-item w-48" onkeypress="if(event.key===&#39;Enter&#39;) handleGlobalSearch(this.value)">
+                        <button class="btn btn-sm btn-primary join-item">
+                            <span class="iconify" data-icon="heroicons:magnifying-glass" data-width="16"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="indicator">
+                    <span class="indicator-item badge badge-primary badge-xs"></span>
+                    <button class="btn btn-ghost btn-circle">
+                        <span class="iconify" data-icon="heroicons:bell" data-width="20"></span>
+                    </button>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div class="dropdown dropdown-end">
+                    <button class="btn btn-ghost btn-circle avatar">
+                        <div class="avatar placeholder inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-content">
+                            <span class="flex items-center justify-center h-full font-semibold text-lg">用</span>
+                        </div>
+                    </button>
+                    <ul class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a onclick="navigateTo(&#39;个人设置页&#39;)" class="justify-between">
+                            <span>个人设置</span>
+                            <span class="badge badge-sm badge-secondary">New</span>
+                        </a></li>
+                        <li><a onclick="navigateTo(&#39;历史询价页&#39;)">历史记录</a></li>
+                        <li><a onclick="navigateTo(&#39;人工客服联系页&#39;)">联系客服</a></li>
+                        <div class="divider my-1"></div>
+                        <li><a onclick="navigateTo(&#39;登录页&#39;)">退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+</div>
+    
+    <div class="flex flex-1">
+        <div data-section-id="common_sidebar" data-section-type="common_sidebar">
+    <aside class="app-sidebar">
+        <div class="p-4">
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="sidebar-text">
+                    <h3 class="font-semibold text-base-content">功能导航</h3>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="toggleSidebar()">
+                    <span class="iconify" data-icon="heroicons:bars-3" data-width="20"></span>
+                </button>
+            </div>
+
+            <!-- Navigation Menu -->
+            <ul class="menu space-y-1">
+                <!-- 首页 -->
+                <li>
+                    <a class="nav-item sidebar-item" data-nav-page="导航主页" onclick="navigateTo(&#39;导航主页&#39;)">
+                        <span class="iconify" data-icon="heroicons:home" data-width="20"></span>
+                        <span class="sidebar-text ml-3">首页</span>
+                    </a>
+                </li>
+
+                <!-- 客服服务 -->
+                <li>
+                    <details>
+                        <summary class="nav-item sidebar-item">
+                            <span class="iconify" data-icon="heroicons:chat-bubble-left-ellipsis" data-width="20"></span>
+                            <span class="sidebar-text ml-3">客服服务</span>
+                        </summary>
+                        <ul class="pl-8 space-y-1">
+                            <li><a onclick="navigateTo(&#39;客服问答页&#39;)">智能问答</a></li>
+                            <li><a onclick="navigateTo(&#39;人工客服联系页&#39;)">人工客服</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <!-- 报价管理 -->
+                <li>
+                    <details>
+                        <summary class="nav-item sidebar-item">
+                            <span class="iconify" data-icon="heroicons:calculator" data-width="20"></span>
+                            <span class="sidebar-text ml-3">报价管理</span>
+                        </summary>
+                        <ul class="pl-8 space-y-1">
+                            <li><a onclick="navigateTo(&#39;询报价首页&#39;)">新建报价</a></li>
+                            <li><a onclick="navigateTo(&#39;计算结果页&#39;)">计算结果</a></li>
+                            <li><a onclick="navigateTo(&#39;报价单详情页&#39;)">报价详情</a></li>
+                            <li><a onclick="navigateTo(&#39;历史询价页&#39;)">历史记录</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <!-- 货运追踪 -->
+                <li>
+                    <a class="nav-item sidebar-item">
+                        <span class="iconify" data-icon="heroicons:map-pin" data-width="20"></span>
+                        <span class="sidebar-text ml-3">货运追踪</span>
+                    </a>
+                </li>
+
+                <!-- 个人中心 -->
+                <li>
+                    <details>
+                        <summary class="nav-item sidebar-item">
+                            <span class="iconify" data-icon="heroicons:user-circle" data-width="20"></span>
+                            <span class="sidebar-text ml-3">个人中心</span>
+                        </summary>
+                        <ul class="pl-8 space-y-1">
+                            <li><a onclick="navigateTo(&#39;个人设置页&#39;)">个人设置</a></li>
+                            <li><a onclick="navigateTo(&#39;忘记密码页&#39;)">修改密码</a></li>
+                        </ul>
+                    </details>
+                </li>
+
+                <!-- 帮助支持 -->
+                <li>
+                    <a class="nav-item sidebar-item" onclick="navigateTo(&#39;人工客服联系页&#39;)">
+                        <span class="iconify" data-icon="heroicons:question-mark-circle" data-width="20"></span>
+                        <span class="sidebar-text ml-3">帮助支持</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Quick Actions -->
+            <div class="mt-8 pt-4 border-t border-base-300">
+                <div class="sidebar-text">
+                    <p class="text-sm font-medium text-base-content mb-3">快捷操作</p>
+                </div>
+                <div class="space-y-2">
+                    <button class="btn btn-primary btn-sm w-full" onclick="navigateTo(&#39;询报价首页&#39;)">
+                        <span class="iconify" data-icon="heroicons:plus" data-width="16"></span>
+                        <span class="sidebar-text ml-2">新建报价</span>
+                    </button>
+                    <button class="btn btn-outline btn-sm w-full" onclick="navigateTo(&#39;客服问答页&#39;)">
+                        <span class="iconify" data-icon="heroicons:chat-bubble-left" data-width="16"></span>
+                        <span class="sidebar-text ml-2">咨询客服</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+        
+        <main class="flex-1 p-8">
+            <!-- Page Title Section -->
+            <section class="mb-8" data-section-id="PageTitleSection">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-base-content mb-2">报价计算结果</h1>
+                    <p class="text-base-content/70 text-lg">以下为您根据输入信息计算出的报价详情</p>
+                </div>
+            </section>
+
+            <!-- Quotation Summary Section -->
+            <section class="mb-8" data-section-id="QuotationSummarySection">
+                <div class="card bg-base-100 shadow-lg border border-base-300">
+                    <div class="card-body p-8">
+                        <h2 class="card-title text-xl mb-6 flex items-center gap-2">
+                            <span class="iconify text-primary" data-icon="heroicons:document-text" data-width="24"></span>
+                            报价概览
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="flex flex-col items-center p-4 bg-base-200 rounded-lg">
+                                <span class="text-sm text-base-content/70 mb-1">总费用</span>
+                                <span class="text-3xl font-bold text-primary total-cost-highlight">¥12,580</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center p-4 bg-base-200 rounded-lg">
+                                <span class="text-sm text-base-content/70 mb-1">货运类型</span>
+                                <span class="text-lg font-medium text-base-content">空运快递</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center p-4 bg-base-200 rounded-lg">
+                                <span class="text-sm text-base-content/70 mb-1">运输路线</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base font-medium">上海</span>
+                                    <span class="iconify text-base-content/50" data-icon="heroicons:arrow-right" data-width="16"></span>
+                                    <span class="text-base font-medium">纽约</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col items-center p-4 bg-base-200 rounded-lg">
+                                <span class="text-sm text-base-content/70 mb-1">预计交货</span>
+                                <span class="text-lg font-medium text-base-content">3-5个工作日</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quotation Details Table Section -->
+            <section class="mb-8" data-section-id="QuotationDetailsTableSection">
+                <div class="card bg-base-100 shadow-lg border border-base-300">
+                    <div class="card-body p-8">
+                        <h2 class="card-title text-xl mb-6 flex items-center gap-2">
+                            <span class="iconify text-primary" data-icon="heroicons:table-cells" data-width="24"></span>
+                            费用明细
+                        </h2>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="table w-full">
+                                <thead>
+                                    <tr class="bg-base-200">
+                                        <th class="cursor-pointer hover:bg-base-300 transition-colors" onclick="sortTable(0)">
+                                            <div class="flex items-center gap-2">
+                                                <span>费用项目</span>
+                                                <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                            </div>
+                                        </th>
+                                        <th class="cursor-pointer hover:bg-base-300 transition-colors" onclick="sortTable(1)">
+                                            <div class="flex items-center gap-2">
+                                                <span>金额</span>
+                                                <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                            </div>
+                                        </th>
+                                        <th>单位</th>
+                                        <th>备注</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="quotationTableBody">
+                                    <tr class="hover:bg-base-50 transition-colors" data-type="shipping">
+                                        <td class="font-medium">基础运费</td>
+                                        <td class="font-bold text-primary">¥8,500</td>
+                                        <td>CNY</td>
+                                        <td class="text-sm text-base-content/70">按重量计算</td>
+                                    </tr>
+                                    <tr class="hover:bg-base-50 transition-colors" data-type="fuel">
+                                        <td class="font-medium">燃油附加费</td>
+                                        <td class="font-bold text-warning">¥1,280</td>
+                                        <td>CNY</td>
+                                        <td class="text-sm text-base-content/70">15%燃油费率</td>
+                                    </tr>
+                                    <tr class="hover:bg-base-50 transition-colors" data-type="tax">
+                                        <td class="font-medium">关税预估</td>
+                                        <td class="font-bold text-info">¥1,800</td>
+                                        <td>CNY</td>
+                                        <td class="text-sm text-base-content/70">按商品类别估算</td>
+                                    </tr>
+                                    <tr class="hover:bg-base-50 transition-colors" data-type="service">
+                                        <td class="font-medium">保险费</td>
+                                        <td class="font-bold text-success">¥500</td>
+                                        <td>CNY</td>
+                                        <td class="text-sm text-base-content/70">货物价值0.5%</td>
+                                    </tr>
+                                    <tr class="hover:bg-base-50 transition-colors" data-type="service">
+                                        <td class="font-medium">操作费</td>
+                                        <td class="font-bold text-accent">¥500</td>
+                                        <td>CNY</td>
+                                        <td class="text-sm text-base-content/70">标准操作费用</td>
+                                    </tr>
+                                    <tr class="bg-primary/10 border-t-2 border-primary font-bold">
+                                        <td class="text-lg">费用总计</td>
+                                        <td class="text-xl text-primary total-amount">¥12,580</td>
+                                        <td>CNY</td>
+                                        <td class="text-sm text-base-content/70">含所有费用</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Action Buttons Section -->
+            <section class="mb-8" data-section-id="ActionButtonsSection">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button class="btn btn-primary btn-lg px-8 confirm-quote-btn" onclick="navigateTo(&#39;报价单详情页&#39;)" data-repeatable="true">
+                        <span class="iconify" data-icon="heroicons:check-circle" data-width="20"></span>
+                        确认报价
+                    </button>
+                    
+                    <button class="btn btn-outline btn-lg px-8" onclick="navigateTo(&#39;询报价首页&#39;)" data-repeatable="true">
+                        <span class="iconify" data-icon="heroicons:pencil-square" data-width="20"></span>
+                        修改信息
+                    </button>
+                    
+                    <button class="btn btn-ghost btn-lg px-8" onclick="navigateTo(&#39;导航主页&#39;)" data-repeatable="true">
+                        <span class="iconify" data-icon="heroicons:home" data-width="20"></span>
+                        返回主页
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div data-section-id="common_footer_simple" data-section-type="common_footer">
+    <footer class="footer-simple px-6 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <span class="text-sm text-base-content opacity-70">© 2025 空运通</span>
+            <span class="iconify text-accent" data-icon="heroicons:shield-check" data-width="16"></span>
+            <span class="text-sm text-accent">安全保障</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <a onclick="navigateTo(&#39;人工客服联系页&#39;)" class="text-sm text-base-content opacity-70 hover:text-primary transition-colors cursor-pointer">客服帮助</a>
+            <a href="#" class="text-sm text-base-content opacity-70 hover:text-primary transition-colors">服务状态</a>
+        </div>
+    </footer>
+</div>
+    <script>
+(function() {
+    // Global app namespace
+    window.APP_GLOBALS = window.APP_GLOBALS || {};
+    
+    // Global navigation function
+    window.navigateTo = function(targetPageId) {
+        const isInIframe = window.self !== window.top;
+        const targetFileName = `${targetPageId}.html`;
+        
+        if (isInIframe) {
+            window.parent.postMessage({
+                type: &#39;iframeNavigation&#39;,
+                targetPageId: targetPageId
+            }, &#39;*&#39;);
+        } else {
+            window.location.href = targetFileName;
+        }
+    };
+
+    // Sidebar collapse functionality
+    window.toggleSidebar = function() {
+        const sidebar = document.querySelector(&#39;[data-section-id="common_sidebar"]&#39;);
+        if (sidebar) {
+            const sidebarEl = sidebar.querySelector(&#39;.app-sidebar&#39;);
+            if (sidebarEl) {
+                sidebarEl.classList.toggle(&#39;collapsed&#39;);
+            }
+        }
+    };
+
+    // Set active navigation item
+    window.setActiveNavItem = function(pageId) {
+        // Remove active class from all nav items
+        document.querySelectorAll(&#39;.nav-item&#39;).forEach(item => {
+            item.classList.remove(&#39;nav-item-active&#39;);
+        });
+        
+        // Add active class to current page nav item
+        const activeItem = document.querySelector(`[data-nav-page="${pageId}"]`);
+        if (activeItem) {
+            activeItem.classList.add(&#39;nav-item-active&#39;);
+        }
+    };
+
+    // Mobile menu toggle
+    window.toggleMobileMenu = function() {
+        const mobileMenu = document.querySelector(&#39;.mobile-menu&#39;);
+        if (mobileMenu) {
+            mobileMenu.classList.toggle(&#39;hidden&#39;);
+        }
+    };
+
+    // Global search functionality
+    window.handleGlobalSearch = function(query) {
+        if (query.trim()) {
+            // Navigate to a search results page or filter current content
+            console.log(&#39;搜索:&#39;, query);
+            // For air freight context, could search shipments, quotes, etc.
+        }
+    };
+
+    // Utility functions for air freight app
+    window.APP_GLOBALS.formatWeight = function(weight, unit = &#39;kg&#39;) {
+        return `${weight} ${unit}`;
+    };
+
+    window.APP_GLOBALS.formatCurrency = function(amount, currency = &#39;CNY&#39;) {
+        return new Intl.NumberFormat(&#39;zh-CN&#39;, {
+            style: &#39;currency&#39;,
+            currency: currency
+        }).format(amount);
+    };
+
+    window.APP_GLOBALS.formatDate = function(date) {
+        return new Intl.DateTimeFormat(&#39;zh-CN&#39;).format(new Date(date));
+    };
+})();
+</script>
+    <script>
+// 表格排序功能
+let sortDirection = {}; // 存储每列的排序方向
+
+function sortTable(columnIndex) {
+    const table = document.getElementById(&#39;quotationTableBody&#39;);
+    const rows = Array.from(table.querySelectorAll(&#39;tr&#39;)).filter(row => !row.classList.contains(&#39;bg-primary/10&#39;));
+    const totalRow = table.querySelector(&#39;tr.bg-primary\\/10&#39;);
+    
+    // 确定排序方向
+    const currentDirection = sortDirection[columnIndex] || &#39;asc&#39;;
+    const newDirection = currentDirection === &#39;asc&#39; ? &#39;desc&#39; : &#39;asc&#39;;
+    sortDirection[columnIndex] = newDirection;
+    
+    // 更新表头样式
+    document.querySelectorAll(&#39;.table th&#39;).forEach(th => {
+        th.classList.remove(&#39;sorted-asc&#39;, &#39;sorted-desc&#39;);
+    });
+    
+    const currentHeader = document.querySelectorAll(&#39;.table th&#39;)[columnIndex];
+    currentHeader.classList.add(newDirection === &#39;asc&#39; ? &#39;sorted-asc&#39; : &#39;sorted-desc&#39;);
+    
+    // 排序逻辑
+    rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        
+        // 如果是金额列，提取数字进行比较
+        if (columnIndex === 1) {
+            aValue = parseFloat(aValue.replace(/[¥,]/g, &#39;&#39;));
+            bValue = parseFloat(bValue.replace(/[¥,]/g, &#39;&#39;));
+        }
+        
+        if (typeof aValue === &#39;number&#39; &amp;&amp; typeof bValue === &#39;number&#39;) {
+            return newDirection === &#39;asc&#39; ? aValue - bValue : bValue - aValue;
+        } else {
+            return newDirection === &#39;asc&#39; 
+                ? aValue.localeCompare(bValue, &#39;zh-CN&#39;)
+                : bValue.localeCompare(aValue, &#39;zh-CN&#39;);
+        }
+    });
+    
+    // 重新插入排序后的行
+    rows.forEach(row => table.appendChild(row));
+    
+    // 确保总计行始终在最后
+    if (totalRow) {
+        table.appendChild(totalRow);
+    }
+}
+
+// 页面加载完成后的初始化
+document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // 设置当前页面为活跃状态
+    window.setActiveNavItem &amp;&amp; window.setActiveNavItem(&#39;计算结果页&#39;);
+    
+    // 为总费用添加动画效果
+    setTimeout(() => {
+        const totalCost = document.querySelector(&#39;.total-cost-highlight&#39;);
+        const totalAmount = document.querySelector(&#39;.total-amount&#39;);
+        
+        if (totalCost) {
+            totalCost.style.animationPlayState = &#39;running&#39;;
+        }
+        if (totalAmount) {
+            totalAmount.style.animationPlayState = &#39;running&#39;;
+        }
+    }, 500);
+    
+    // 添加表格行的微动画
+    const tableRows = document.querySelectorAll(&#39;#quotationTableBody tr&#39;);
+    tableRows.forEach((row, index) => {
+        if (!row.classList.contains(&#39;bg-primary/10&#39;)) {
+            row.style.opacity = &#39;0&#39;;
+            row.style.transform = &#39;translateY(20px)&#39;;
+            
+            setTimeout(() => {
+                row.style.transition = &#39;all 0.3s ease-out&#39;;
+                row.style.opacity = &#39;1&#39;;
+                row.style.transform = &#39;translateY(0)&#39;;
+            }, 100 * index);
+        }
+    });
+});
+
+// 按钮点击反馈
+document.querySelectorAll(&#39;.btn&#39;).forEach(button => {
+    button.addEventListener(&#39;click&#39;, function() {
+        this.style.transform = &#39;scale(0.95)&#39;;
+        setTimeout(() => {
+            this.style.transform = &#39;&#39;;
+        }, 150);
+    });
+});
+
+// 费用明细提示功能（可选）
+function showCostTooltip(element, message) {
+    // 创建简单的提示框
+    const tooltip = document.createElement(&#39;div&#39;);
+    tooltip.className = &#39;absolute bg-base-300 text-base-content text-sm p-2 rounded shadow-lg z-50&#39;;
+    tooltip.textContent = message;
+    tooltip.style.top = element.offsetTop + element.offsetHeight + &#39;px&#39;;
+    tooltip.style.left = element.offsetLeft + &#39;px&#39;;
+    
+    element.parentNode.appendChild(tooltip);
+    
+    setTimeout(() => {
+        tooltip.remove();
+    }, 3000);
+}
+</script>
+
+<script>
+    setTimeout(() => {
+      Holder.run({
+        domain: "placehold.co"
+      })
+    }, 100)
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            
